@@ -10,19 +10,21 @@ const candidateSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    candidateId: {
-      type: String,
+    ballot: {
+      type: Number,
       required: true,
+      unique: true,
     },
     portfolio: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Portfolio",
       required: true,
     },
     votes: {
       type: Number,
       default: 0,
     },
-    electionId: {
+    election: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Election",
       required: true,

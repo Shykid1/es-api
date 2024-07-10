@@ -1,55 +1,87 @@
 const express = require("express");
-const authMiddleware = require("../middlewares/auth.middleware");
-const userController = require("../controllers/user.controller");
-const electionController = require("../controllers/election.controller");
-const candidateController = require("../controllers/candidate.controller");
-
 const router = express.Router();
+const { vote } = require("../controllers/vote.controller");
+const election = require("../controllers/election.controller");
+const candidate = require("../controllers/candidate.controller");
+const user = require("../controllers/user.controller");
+const auth = require("../middlewares/auth.middleware");
+const portfolio = require("../controllers/portfolios.controller");
 
-// User routes
-router.post("/register", userController.registerUser);
-router.post("/login", userController.loginUser);
-router.post("/logout", authMiddleware(), userController.logoutUser);
+// Vote
+router.post("/vote/:candidateId", auth.authMiddleware(["voter"]), vote);
 
-// Election routes
-router.post(
-  "/elections",
-  authMiddleware(["Admin", "Super"]),
-  electionController.createElection
-);
-router.get("/elections", authMiddleware(), electionController.getElections);
+// Portfolio
 router.get(
-  "/elections/:electionId",
-  authMiddleware(),
-  electionController.getElectionById
-);
-router.put(
-  "/elections/:electionId",
-  authMiddleware(["Admin", "Super"]),
-  electionController.updateElection
-);
-router.post("/vote", authMiddleware(["Voter"]), electionController.vote);
-
-// Candidate routes
-router.post(
-  "/candidates",
-  authMiddleware(["Admin", "Super"]),
-  candidateController.createCandidate
+  "/portfolio",
+  auth.authMiddleware(["official", "superAdmin"]),
+  portfolio.getPortfolios
 );
 router.get(
-  "/candidates/election/:electionId",
-  authMiddleware(),
-  candidateController.getCandidatesByElection
+  "/portfolio/:portfolioId",
+  auth.authMiddleware(["official", "superAdmin"]),
+  portfolio.getPortfolioById
+);
+
+// Election
+router.post(
+  "/election",
+  auth.authMiddleware(["superAdmin"]),
+  election.createElection
+);
+router.get("/election/:electionId", election.getElectionById);
+router.get(
+  "/election",
+  auth.authMiddleware(["official", "superAdmin"]),
+  election.getElections
 );
 router.put(
-  "/candidates/:candidateId",
-  authMiddleware(["Admin", "Super"]),
-  candidateController.updateCandidate
+  "/election/extend/:electionId",
+  auth.authMiddleware(["official"]),
+  election.extendElection
 );
-router.delete(
-  "/candidates/:candidateId",
-  authMiddleware(["Admin", "Super"]),
-  candidateController.deleteCandidate
+router.put(
+  "/election/status/:electionId",
+  auth.authMiddleware(["superAdmin"]),
+  election.updateElectionStatus
 );
+
+// Candidate
+router.post(
+  "/candidate",
+  auth.authMiddleware(["official", "superAdmin"]),
+  candidate.createCandidate
+);
+router.get(
+  "/candidate",
+  auth.authMiddleware(["official", "superAdmin"]),
+  candidate.getCandidates
+);
+router.put(
+  "/candidate/:candidateId",
+  auth.authMiddleware(["official", "superAdmin"]),
+  candidate.updateCandidate
+);
+
+// Voter
+router.post(
+  "/auth/register/voter",
+  auth.authMiddleware(["official"]),
+  user.registerVoter
+);
+
+// Official
+router.post("/auth/register/official", user.registerOfficial);
+
+// Super Admin
+router.post("/auth/register/super-admin", user.registerSuperAdmin);
+
+// Super Admin Login
+router.post("/auth/super-admin/login", user.superAdminLogin);
+
+// Official Login
+router.post("/auth/official/login", user.officialLogin);
+
+// Voter Login
+router.post("/auth/voter/login", user.voterLogin);
 
 module.exports = router;

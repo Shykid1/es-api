@@ -2,14 +2,18 @@ const mongoose = require("mongoose");
 
 const superAdminSchema = new mongoose.Schema(
   {
-    name: {
+    userName: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    password: {
       type: String,
       required: true,
     },
-    userId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
+    role: {
+      type: String,
+      default: "superAdmin",
     },
   },
   { timestamps: true }

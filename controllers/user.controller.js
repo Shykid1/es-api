@@ -1,67 +1,163 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const User = require("../models/user.model");
 const Voter = require("../models/voter.model");
-const Admin = require("../models/admin.model");
 const SuperAdmin = require("../models/superAdmin.model");
+const Official = require("../models/official.model");
 
 const generateToken = (id, role) => {
-  return jwt.sign({ id, role }, process.env.JWT_SECRET, { expiresIn: "1h" });
+  return jwt.sign({ id, role }, process.env.JWT_SECRET);
 };
 
-exports.registerUser = async (req, res) => {
-  const { email, password, role, name, studentId } = req.body;
+exports.registerSuperAdmin = async (req, res) => {
+  const { userName, password } = req.body;
 
   try {
-    const hashedPassword = await bcrypt.hash(password, 12);
-    const user = new User({ email, password: hashedPassword, role });
-    await user.save();
-
-    let profile;
-    if (role === "Voter") {
-      profile = new Voter({ name, studentId, userId: user._id });
-    } else if (role === "Admin") {
-      profile = new Admin({ name, userId: user._id });
-    } else if (role === "Super") {
-      profile = new SuperAdmin({ name, userId: user._id });
+    // Check if the super admin already exists
+    const existingSuperAdmin = await SuperAdmin.findOne({ userName });
+    if (existingSuperAdmin) {
+      return res.status(400).json({ message: "Super admin already exists" });
     }
-    await profile.save();
 
-    const token = generateToken(user._id, user.role);
-    res.status(201).json({ token });
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(password, 12);
+
+    // Create the new super admin
+    const newSuperAdmin = new SuperAdmin({
+      userName,
+      password: hashedPassword,
+    });
+
+    await newSuperAdmin.save();
+
+    res.status(201).json({ message: "Super admin created successfully" });
   } catch (error) {
-    res.status(400).json({ message: "Registration failed", error });
+    res.status(500).json({ message: "Super admin creation failed", error });
   }
 };
 
-exports.loginUser = async (req, res) => {
-  const { email, password, studentId } = req.body;
+exports.registerOfficial = async (req, res) => {
+  const { fullName, STUDENTID, password } = req.body;
 
   try {
-    let user;
-    if (email) {
-      user = await User.findOne({ email });
-    } else if (studentId) {
-      const voter = await Voter.findOne({ studentId }).populate("userId");
-      user = voter ? voter.userId : null;
+    // Check if the official already exists
+    const existingOfficial = await Official.findOne({ STUDENTID });
+    if (existingOfficial) {
+      return res.status(400).json({ message: "Official already exists" });
     }
 
-    if (!user || !(await bcrypt.compare(password, user.password))) {
-      return res.status(401).json({ message: "Invalid credentials" });
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(password, 12);
+
+    // Create the new official
+    const newOfficial = new Official({
+      fullName,
+      STUDENTID,
+      password: hashedPassword,
+    });
+
+    await newOfficial.save();
+
+    res.status(201).json({ message: "Official created successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Official creation failed", error });
+  }
+};
+
+exports.registerVoter = async (req, res) => {
+  const { STUDENTID, OTP } = req.body;
+
+  // Check if the voter exists in the voters database using the STUDENTID not _id
+  const existingVoter = await Voter.findOne({ STUDENTID: STUDENTID });
+  if (!existingVoter) {
+    return res.status(400).json({ message: "Voter does not exist" });
+  }
+
+  // Check if the voter has already voted
+  if (existingVoter.ISVOTED) {
+    return res.status(400).json({ message: "Voter has already voted" });
+  }
+
+  // Upddate the voter with the OTP
+  const updatedVoter = await Voter.findByIdAndUpdate(existingVoter._id, {
+    OTP,
+  });
+
+  res.json({ message: "OTP Generated successfully" });
+};
+
+exports.superAdminLogin = async (req, res) => {
+  const { userName, password } = req.body;
+
+  try {
+    // Check if the super admin exists
+    const superAdmin = await SuperAdmin.findOne({ userName });
+    if (!superAdmin) {
+      return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    const token = generateToken(user._id, user.role);
+    // Check if the password is correct
+    const isPasswordCorrect = await bcrypt.compare(
+      password,
+      superAdmin.password
+    );
+    if (!isPasswordCorrect) {
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
+
+    // Generate token
+    const token = generateToken(superAdmin._id, "Super");
+
     res.json({ token });
   } catch (error) {
-    res.status(400).json({ message: "Login failed", error });
+    res.status(500).json({ message: "Login failed", error });
   }
 };
 
-exports.logoutUser = async (req, res) => {
+exports.officialLogin = async (req, res) => {
+  const { STUDENTID, password } = req.body;
+
   try {
-    // Implement logout logic as needed
-    res.json({ message: "Logout successful" });
+    // Check if the official exists
+    const official = await Official.findOne({ STUDENTID });
+    if (!official) {
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
+
+    // Check if the password is correct
+    const isPasswordCorrect = await bcrypt.compare(password, official.password);
+    if (!isPasswordCorrect) {
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
+
+    // Generate token
+    const token = generateToken(official._id, "Official");
+
+    res.json({ token });
   } catch (error) {
-    res.status(500).json({ message: "Logout failed", error });
+    res.status(500).json({ message: "Login failed", error });
+  }
+};
+
+exports.voterLogin = async (req, res) => {
+  const { STUDENTID, OTP } = req.body;
+
+  try {
+    // Check if the voter exists
+    const voter = await Voter.findOne({ STUDENTID });
+    if (!voter) {
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
+
+    // Check if the OTP is correct
+    if (voter.OTP !== OTP) {
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
+
+    // Generate token
+    const token = generateToken(voter._id, "Voter");
+
+    res.json({ token });
+  } catch (error) {
+    res.status(500).json({ message: "Login failed", error });
   }
 };

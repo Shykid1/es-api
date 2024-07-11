@@ -63,6 +63,16 @@ exports.registerOfficial = async (req, res) => {
   }
 };
 
+exports.getOfficials = async (req, res) => {
+  try {
+    const officials = await Official.find();
+    
+    res.status(201).json(officials);
+  } catch (error) {
+    res.status(500).json({message: "Can't fetch officials"})
+  }
+}
+
 exports.registerVoter = async (req, res) => {
   const { STUDENTID, OTP } = req.body;
 

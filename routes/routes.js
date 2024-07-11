@@ -71,6 +71,7 @@ router.post(
 
 // Official
 router.post("/auth/register/official", user.registerOfficial);
+router.get("/official", user.getOfficials)
 
 // Super Admin
 router.post("/auth/register/super-admin", user.registerSuperAdmin);

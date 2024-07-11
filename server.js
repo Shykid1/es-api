@@ -21,12 +21,13 @@ const corsOptions = {
     "Origin, Content-Type, Accept, Authorization, X-Requested-With",
   credentials: true,
   preflightContinue: false,
-  optionsSuccessStatus: 200,
+  optionsSuccessStatus: 204,
 };
 
 // Middleware
 app.use(express.json());
 app.use(cors(corsOptions));
+app.options("*", cors(corsOptions));
 
 // Routes
 app.use("/api", require("./routes/routes"));

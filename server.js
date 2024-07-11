@@ -1,7 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
-const cors = require("cors");
+// const cors = require("cors");
 const dbConnect = require("./utils/db");
 
 // Load env variables

@@ -16,12 +16,12 @@ const app = express();
 // Cors options
 const corsOptions = {
   origin: "*",
-  methods: "GET, POST, PUT, DELETE",
-  allowedHeaders:
-    "Origin, Content-Type, Accept, Authorization, X-Requested-With",
-  credentials: true,
-  preflightContinue: false,
-  optionsSuccessStatus: 204,
+  methods: ["GET, POST, PUT, DELETE"],
+  // allowedHeaders:
+  //   "Origin, Content-Type, Accept, Authorization, X-Requested-With",
+  // credentials: true,
+  // preflightContinue: false,
+  // optionsSuccessStatus: 204,
 };
 
 // Middleware

@@ -13,18 +13,9 @@ dbConnect();
 // Initialize express app
 const app = express();
 
-// Cors options
-const corsOpts = {
-  origin: "*",
-
-  methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
-
-  allowedHeaders: ["Content-Type"],
-};
-
 // Middleware
 app.use(express.json());
-app.use(cors(corsOpts));
+app.use(cors());
 app.use(function (req, res, next) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");

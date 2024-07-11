@@ -15,7 +15,7 @@ const app = express();
 
 // Cors options
 const corsOptions = {
-  origin: "https://localhost:5173",
+  origin: "*",
   methods: "GET, POST, PUT, DELETE",
   allowedHeaders:
     "Origin, Content-Type, Accept, Authorization, X-Requested-With",
@@ -26,8 +26,7 @@ const corsOptions = {
 
 // Middleware
 app.use(express.json());
-app.use(cors(corsOptions));
-app.options("*", cors(corsOptions));
+app.use(cors());
 
 // Routes
 app.use("/api", require("./routes/routes"));

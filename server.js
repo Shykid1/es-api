@@ -1,7 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
-// const cors = require("cors");
+const cors = require("cors");
 const dbConnect = require("./utils/db");
 
 // Load env variables
@@ -14,19 +14,24 @@ dbConnect();
 const app = express();
 
 // Cors options
-// const corsOptions = {
-//   origin: "*",
-//   methods: ["GET, POST, PUT, DELETE"],
-//   // allowedHeaders:
-//   //   "Origin, Content-Type, Accept, Authorization, X-Requested-With",
-//   // credentials: true,
-//   // preflightContinue: false,
-//   // optionsSuccessStatus: 204,
-// };
+const corsOpts = {
+  origin: "*",
+
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+
+  allowedHeaders: ["Content-Type"],
+};
 
 // Middleware
 app.use(express.json());
-// app.use(cors());
+app.use(cors(corsOpts));
+app.use(function (req, res, next) {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  res.setHeader("Access-Control-Allow-Credentials", true);
+  next();
+});
 
 // Routes
 app.use("/api", require("./routes/routes"));

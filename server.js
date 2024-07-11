@@ -13,6 +13,16 @@ dbConnect();
 // Initialize express app
 const app = express();
 
+// Cors options
+const corsOptions = {
+  origin: "localhost:5173",
+  methods: "GET, POST, PUT, DELETE",
+  allowedHeaders:
+    "Origin, Content-Type, Accept, Authorization, X-Requested-With",
+  credentials: true,
+  optionsSuccessStatus: 200,
+};
+
 // Middleware
 app.use(express.json());
 app.use(cors());

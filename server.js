@@ -20,12 +20,13 @@ const corsOptions = {
   allowedHeaders:
     "Origin, Content-Type, Accept, Authorization, X-Requested-With",
   credentials: true,
+  preflightContinue: false,
   optionsSuccessStatus: 200,
 };
 
 // Middleware
 app.use(express.json());
-app.use(cors());
+app.use(cors(corsOptions));
 
 // Routes
 app.use("/api", require("./routes/routes"));

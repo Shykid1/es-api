@@ -34,7 +34,7 @@ exports.vote = async (req, res) => {
 
     // Check if the voter has voted before
     if (voter.ISVOTED) {
-      return res.status(400).json({ message: "You have voted before" });
+      return res.status(400).json({ message: "You have already voted " });
     }
 
     // Vote for the candidate

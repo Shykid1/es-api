@@ -66,33 +66,47 @@ exports.registerOfficial = async (req, res) => {
 exports.getOfficials = async (req, res) => {
   try {
     const officials = await Official.find();
-    
-    res.status(201).json(officials);
+
+    res.status(200).json(officials);
   } catch (error) {
-    res.status(500).json({message: "Can't fetch officials"})
+    res.status(500).json({ message: "Can't fetch officials" });
   }
-}
+};
 
 exports.registerVoter = async (req, res) => {
-  const { STUDENTID, OTP } = req.body;
+  try {
+    const { STUDENTID, OTP } = req.body;
 
-  // Check if the voter exists in the voters database using the STUDENTID not _id
-  const existingVoter = await Voter.findOne({ STUDENTID: STUDENTID });
-  if (!existingVoter) {
-    return res.status(400).json({ message: "Voter does not exist" });
+    // Check if the voter exists in the voters database using the STUDENTID not _id
+    const existingVoter = await Voter.findOne({ STUDENTID: STUDENTID });
+    if (!existingVoter) {
+      return res.status(400).json({ message: "Voter does not exist" });
+    }
+
+    // Check if the voter has already voted
+    if (existingVoter.ISVOTED) {
+      return res.status(400).json({ message: "Voter has already voted" });
+    }
+
+    // Upddate the voter with the OTP
+    const updatedVoter = await Voter.findByIdAndUpdate(existingVoter._id, {
+      OTP,
+    });
+
+    res.json({ message: "OTP Generated successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Can't fetch officials" });
   }
+};
 
-  // Check if the voter has already voted
-  if (existingVoter.ISVOTED) {
-    return res.status(400).json({ message: "Voter has already voted" });
+exports.getVoters = async (req, res) => {
+  try {
+    const voters = await Voter.find();
+
+    res.status(200).json(voters);
+  } catch (error) {
+    res.status(500).json({ message: "Can't fetch officials" });
   }
-
-  // Upddate the voter with the OTP
-  const updatedVoter = await Voter.findByIdAndUpdate(existingVoter._id, {
-    OTP,
-  });
-
-  res.json({ message: "OTP Generated successfully" });
 };
 
 exports.superAdminLogin = async (req, res) => {

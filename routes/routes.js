@@ -36,7 +36,7 @@ router.get(
 );
 router.put(
   "/election/extend/:electionId",
-  auth.authMiddleware(["official"]),
+  auth.authMiddleware(["official", "superAdmin"]),
   election.extendElection
 );
 router.put(
@@ -65,17 +65,14 @@ router.put(
 // Voter
 router.post(
   "/auth/register/voter",
-  auth.authMiddleware(["official"]),
+  auth.authMiddleware(["official", "superAdmin"]),
   user.registerVoter
 );
-router.get(
-  "/voter",
-  auth.authMiddleware(["official", "superAdmin"]),
-  user.getVoters
-);
+router.get("/voter", user.getVoters);
 
 // Official
 router.post("/auth/register/official", user.registerOfficial);
+router.get("/official", user.getOfficials);
 
 // Super Admin
 router.post("/auth/register/super-admin", user.registerSuperAdmin);

@@ -36,7 +36,7 @@ router.get(
 );
 router.put(
   "/election/extend/:electionId",
-  auth.authMiddleware(["official"]),
+  auth.authMiddleware(["official", "superAdmin"]),
   election.extendElection
 );
 router.put(

@@ -68,6 +68,11 @@ router.post(
   auth.authMiddleware(["official"]),
   user.registerVoter
 );
+router.get(
+  "/voter",
+  auth.authMiddleware(["official", "superAdmin"]),
+  user.getVoters
+);
 
 // Official
 router.post("/auth/register/official", user.registerOfficial);

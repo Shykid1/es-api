@@ -85,6 +85,16 @@ exports.registerVoter = async (req, res) => {
   res.json({ message: "OTP Generated successfully" });
 };
 
+// Get all voters
+exports.getVoters = async (req, res) => {
+  try {
+    const voters = await Voter.find();
+    res.json(voters);
+  } catch (error) {
+    res.status(500).json({ message: "Fetching voters failed", error });
+  }
+};
+
 exports.superAdminLogin = async (req, res) => {
   const { userName, password } = req.body;
 

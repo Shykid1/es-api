@@ -8,7 +8,7 @@ const auth = require("../middlewares/auth.middleware");
 const portfolio = require("../controllers/portfolios.controller");
 
 // Vote
-router.post("/vote/:candidateId", auth.authMiddleware(["voter"]), vote);
+router.post("/vote/:candidateId", vote);
 
 // Portfolio
 router.get(
@@ -63,11 +63,7 @@ router.put(
 );
 
 // Voter
-router.post(
-  "/auth/register/voter",
-  auth.authMiddleware(["official", "superAdmin"]),
-  user.registerVoter
-);
+router.post("/auth/register/voter", user.registerVoter);
 router.get("/voter", user.getVoters);
 
 // Official

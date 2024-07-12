@@ -93,7 +93,9 @@ exports.registerVoter = async (req, res) => {
       OTP,
     });
 
-    res.json({ message: "OTP Generated successfully" });
+    res
+      .status(200)
+      .json({ message: "OTP Generated successfully", updatedVoter });
   } catch (error) {
     res.status(500).json({ message: "Can't fetch officials" });
   }

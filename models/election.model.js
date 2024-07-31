@@ -6,22 +6,22 @@ const electionSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    candidates: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Candidate",
-      },
-    ],
+    // candidates: [
+    //   {
+    //     type: mongoose.Schema.Types.ObjectId,
+    //     ref: "Candidate",
+    //   },
+    // ],
     status: {
       type: String,
       enum: ["scheduled", "active", "ended", "extended"],
       default: "scheduled",
     },
-    startDate: {
+    startTime: {
       type: Date,
       required: true,
     },
-    endDate: {
+    endTime: {
       type: Date,
       required: true,
     },
@@ -29,6 +29,7 @@ const electionSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    
   },
   { timestamps: true }
 );

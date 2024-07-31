@@ -16,6 +16,14 @@ exports.createCandidate = async (req, res) => {
     });
 
     await candidate.save();
+
+    // Update the portfolio to include this candidate
+    await Portfolio.findByIdAndUpdate(
+      portfolio,
+      { $push: { candidates: candidate._id } },
+      { new: true }
+    );
+
     res.status(201).json(candidate);
   } catch (error) {
     res.status(400).json({ message: "Creation failed", error });
@@ -26,7 +34,13 @@ exports.createCandidate = async (req, res) => {
 exports.getCandidates = async (req, res) => {
   try {
     const candidates = await Candidate.find();
-    res.status(200).json(candidates);
+    const allCandidates = await Promise.all(
+      candidates.map(async (candidate) => {
+        const portfolio = await Portfolio.findById(candidate.portfolio);
+        return { ...candidate._doc, portfolio: portfolio.name, portfolioId: portfolio._id };
+      })
+    );
+    res.status(200).json(allCandidates);
   } catch (error) {
     res.status(400).json({ message: "Error fetching candidates", error });
   }

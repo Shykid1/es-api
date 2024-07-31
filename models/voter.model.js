@@ -19,6 +19,11 @@ const voterSchema = new mongoose.Schema({
     type: String,
     default: "voter",
   },
+  votedPortfolios: {
+    type: [mongoose.Schema.Types.ObjectId],
+    ref: "Portfolio",
+    default: [],
+  },
 });
 
 const Voter = mongoose.models.Voter || mongoose.model("Voter", voterSchema);

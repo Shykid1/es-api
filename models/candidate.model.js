@@ -24,6 +24,10 @@ const candidateSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    noVotes: {
+      type: Number,
+      default: 0
+    },
     election: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Election",

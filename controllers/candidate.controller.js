@@ -37,7 +37,11 @@ exports.getCandidates = async (req, res) => {
     const allCandidates = await Promise.all(
       candidates.map(async (candidate) => {
         const portfolio = await Portfolio.findById(candidate.portfolio);
-        return { ...candidate._doc, portfolio: portfolio.name, portfolioId: portfolio._id };
+        return {
+          ...candidate._doc,
+          portfolio: portfolio.name,
+          portfolioId: portfolio._id,
+        };
       })
     );
     res.status(200).json(allCandidates);
@@ -60,7 +64,7 @@ exports.updateCandidate = async (req, res) => {
     candidate.image = image;
     candidate.name = name;
     candidate.ballot = ballot;
-    candidate.portfolio = portfolio;
+    candidate.portfolioId = portfolio;
     candidate.election = election;
 
     await candidate.save();

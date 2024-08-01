@@ -6,12 +6,7 @@ const electionSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    // candidates: [
-    //   {
-    //     type: mongoose.Schema.Types.ObjectId,
-    //     ref: "Candidate",
-    //   },
-    // ],
+   
     status: {
       type: String,
       enum: ["scheduled", "active", "ended", "extended"],

@@ -1,4 +1,3 @@
-
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const xlsx = require("xlsx");
@@ -180,8 +179,12 @@ exports.voterLogin = async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    // Check if the OTP is correct
+    if (voter.ISVOTED) {
+      return res.status(400).json({ message: "Voter has already voted" });
+    }
+
     if (voter.OTP !== OTP) {
+      // Check if the OTP is correct
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
@@ -250,12 +253,10 @@ exports.uploadVoters = async (req, res) => {
     res.status(200).json({ message: "File uploaded and data saved", voters });
   } catch (error) {
     console.error(error);
-    res
-      .status(500)
-      .json({
-        message: "Failed to upload and save data",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "Failed to upload and save data",
+      error: error.message,
+    });
   }
 };
 exports.vote = async (req, res) => {
@@ -288,6 +289,36 @@ exports.vote = async (req, res) => {
     res.status(200).json({ message: "Vote recorded successfully" });
   } catch (error) {
     console.error("Vote recording failed:", error.message);
-    res.status(500).json({ message: "Vote recording failed", error });
+    res.status(500).json({ message: "Vote recording failed" });
   }
 };
+
+exports.grantOfficialAccess = async (req, res) => {
+  const { studentId } = req.params
+
+  try {
+    const official = await Official.findOne({ STUDENTID: studentId })
+
+    official.access = true
+    official.save()
+    return res.status(200).json({ message: 'Access Granted'})
+  } catch (error) {
+    console.error("Granting Official Access failed", error.message)
+    return res.status(500).json({ message: "Could grant official access"})
+  }
+}
+
+exports.revokeOfficialAccess = async (req, res) => {
+  const { studentId } = req.params
+
+  try {
+    const official = await Official.findOne({ STUDENTID: studentId })
+
+    official.access = false
+    official.save()
+    return res.status(200).json({ message: 'Access Revoked'})
+  } catch (error) {
+    console.error("Revoking Official Access failed", error.message)
+    return res.status(500).json({ message: "Could revoke official access"})
+  }
+}

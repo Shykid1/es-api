@@ -4,14 +4,14 @@ const { vote } = require("../controllers/vote.controller");
 const election = require("../controllers/election.controller");
 const candidate = require("../controllers/candidate.controller");
 const user = require("../controllers/user.controller");
+const {results} = require("../controllers/results.controller.js");
 const auth = require("../middlewares/auth.middleware");
 const portfolio = require("../controllers/portfolios.controller");
 const { authMiddleware } = require("../middlewares/auth.middleware");
 
-
-
 // Vote
 router.post("/vote/:portfolioId", authMiddleware(["voter"]), vote);
+
 // Portfolio
 router.get(
   "/portfolios",
@@ -19,13 +19,21 @@ router.get(
   portfolio.getPortfolios
 );
 
-router.post( "/portfolios", auth.authMiddleware([ "official" ,"superAdmin"]), portfolio.createPortfolio);
+// Add Portfolio
+router.post(
+  "/portfolios",
+  auth.authMiddleware(["official", "superAdmin"]),
+  portfolio.createPortfolio
+);
 
+// Get All portfolios
 router.get(
   "/portfolio/:portfolioId",
   auth.authMiddleware(["official", "superAdmin"]),
   portfolio.getPortfolioById
 );
+
+// Get a portfolio
 router.get(
   "/portfolio/:portfolioId/with-candidates",
   auth.authMiddleware(["official", "superAdmin"]),
@@ -38,17 +46,28 @@ router.post(
   auth.authMiddleware(["superAdmin"]),
   election.createElection
 );
+
+
+
+// Get election results
+router.get(
+  "/results",
+  auth.authMiddleware(["superAdmin"]),
+  election.getResults
+);
 router.get("/election/:electionId", election.getElectionById);
 router.get(
   "/election",
   auth.authMiddleware(["official", "superAdmin"]),
   election.getElections
 );
+
 router.put(
   "/election/extend/:electionId",
-  authMiddleware,
+  auth.authMiddleware(["superAdmin"]),
   election.extendElection
 );
+
 router.put(
   "/election/status/:electionId",
   auth.authMiddleware(["superAdmin"]),
@@ -60,13 +79,15 @@ router.post(
   "/candidate",
   auth.authMiddleware(["official", "superAdmin"]),
   candidate.createCandidate
-
 );
+
 router.get(
   "/candidates",
   auth.authMiddleware(["official", "superAdmin"]),
+  // uploadImage.single(),
   candidate.getCandidates
 );
+
 router.put(
   "/candidate/:candidateId",
   auth.authMiddleware(["official", "superAdmin"]),
@@ -81,13 +102,11 @@ const multer = require("multer");
 const upload = multer({ dest: "uploads/" });
 router.post("/upload", upload.single("file"), user.uploadVoters);
 
-
-
-
-
 // Official
 router.post("/auth/register/official", user.registerOfficial);
 router.get("/official", user.getOfficials);
+router.put("/official/access/:studentId", auth.authMiddleware(["superAdmin"]), user.grantOfficialAccess)
+router.put("/official/revoke/:studentId", auth.authMiddleware(["superAdmin"]), user.revokeOfficialAccess)
 
 // Super Admin
 router.post("/auth/register/super-admin", user.registerSuperAdmin);

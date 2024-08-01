@@ -119,6 +119,7 @@ exports.vote = [
 
       // Update voter and election
       voter.votedPortfolios.push(portfolio._id);
+      voter.ISVOTED = true
       await voter.save();
       election.totalVotes = (election.totalVotes || 0) + 1;
       await election.save();

@@ -1,5 +1,7 @@
 const Candidate = require("../models/candidate.model");
 const Election = require("../models/election.model");
+const Portfolio = require("../models/portfolio.model");
+const mongoose = require("mongoose");
 
 // Create election
 exports.createElection = async (req, res) => {
@@ -47,15 +49,15 @@ exports.extendElection = async (req, res) => {
     }
 
     const now = new Date();
-    const newEndDate = new Date(newEndTime);
+    const extendedTime = new Date(newEndTime);
 
-    if (newEndDate <= now) {
+    if (extendedTime <= now) {
       return res
         .status(400)
         .json({ message: "New end time must be in the future" });
     }
 
-    election.endTime = newEndTime;
+    election.endTime = extendedTime;
     election.status = "extended";
     await election.save();
 
@@ -69,9 +71,9 @@ exports.extendElection = async (req, res) => {
 };
 
 // Update election Status
-exports.updateElectionStatus = async (req, res) => {
+exports.updateElectionStatus = async (req, res) => {  
   const { electionId } = req.params;
-  const { status } = req.body;
+  const { status } = req.body;  
 
   try {
     const election = await Election.findById(electionId);
@@ -81,8 +83,7 @@ exports.updateElectionStatus = async (req, res) => {
 
     const validTransitions = {
       scheduled: ["active"],
-      active: ["paused", "ended"],
-      paused: ["active", "ended"],
+      active: ["ended"],
       extended: ["ended"],
       ended: [],
     };
@@ -149,4 +150,62 @@ exports.updateElectionStatuses = async (req, res) => {
       error: error.message,
     });
   }
+};
+// Add this to your election.controller.js file
+
+
+
+// Get election results
+exports.getResults = async (req, res) => {
+    console.log(
+      "Received request for election results",
+      // req.params.electionId
+    );
+    try {
+      // const { electionId } = req.params;
+
+      // if (!mongoose.Types.ObjectId.isValid(electionId)) {
+      //   return res.status(400).json({ message: "Invalid election ID format" });
+      // }
+
+      const election = await Election.findOne({ $or: [{status: "active"}, {status: "extended"}]});
+
+      const portfolios = await Portfolio.find({
+        election: election._id,
+      }).populate("candidates");
+
+      const results = portfolios.map((portfolio) => ({
+        _id: portfolio._id,
+        name: portfolio.name,
+        candidates: portfolio.candidates.map((candidate) => ({
+          _id: candidate._id,
+          name: candidate.name,
+          votes: candidate.votes,
+          yesNoVotes:
+            candidate.yesVotes !== undefined
+              && {
+                  yes: candidate.yesVotes,
+                  no: candidate.noVotes,
+                },
+        })),
+      }));
+
+      res.status(200).json({
+        electionId: election._id,
+        electionName: election.title,
+        status: election.status,
+        startTime: election.startTime,
+        endTime: election.endTime,
+        totalVotes: election.totalVotes,
+        results,
+      });
+    } catch (error) {
+      console.error("Error fetching results:", error);
+      res
+        .status(500)
+        .json({
+          message: "Failed to fetch election results",
+          error: error.message,
+        });
+    }
 };

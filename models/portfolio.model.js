@@ -1,3 +1,4 @@
+
 // const mongoose = require("mongoose");
 
 // const portfolioSchema = new mongoose.Schema({
@@ -10,6 +11,12 @@
 //     type: Number,
 //     required: true,
 //   },
+//   candidates: [
+//     {
+//       type: mongoose.Schema.Types.ObjectId,
+//       ref: "Candidate",
+//     },
+//   ],
 // });
 
 // const Portfolio =
@@ -34,6 +41,11 @@ const portfolioSchema = new mongoose.Schema({
       ref: "Candidate",
     },
   ],
+  election: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Election",
+    required: true,
+  },
 });
 
 const Portfolio =

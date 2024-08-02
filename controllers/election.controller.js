@@ -119,11 +119,11 @@ exports.getElectionById = async (req, res) => {
 };
 
 // Update election statuses
-exports.updateElectionStatuses = async (req, res) => {
+exports.updateElectionStatus = async (req, res) => {
   try {
     const now = new Date();
 
-    // Update scheduled elections to active
+    // Update scheduled elections to active  
     await Election.updateMany(
       { status: "scheduled", startTime: { $lte: now } },
       { $set: { status: "active" } }
@@ -208,4 +208,63 @@ exports.getResults = async (req, res) => {
           error: error.message,
         });
     }
+};
+exports.getResults = async (req, res) => {
+  console.log("Received request for election results");
+  try {
+    const election = await Election.findOne({
+      $or: [{ status: "active" }, { status: "extended" }],
+    });
+    console.log("Found election:", election);
+
+    if (!election) {
+      return res
+        .status(404)
+        .json({ message: "No active or extended election found" });
+    }
+
+    const portfolios = await Portfolio.find({
+      election: election._id,
+    }).populate("candidates");
+    console.log("Found portfolios:", portfolios);
+
+    const results = portfolios.map((portfolio) => ({
+      _id: portfolio._id,
+      name: portfolio.name,
+      candidates: portfolio.candidates.map((candidate) => ({
+        _id: candidate._id,
+        name: candidate.name,
+        votes: candidate.votes || 0,
+        yesNoVotes:
+          candidate.yesVotes !== undefined
+            ? { yes: candidate.yesVotes || 0, no: candidate.noVotes || 0 }
+            : undefined,
+      })),
+    }));
+
+    console.log("Processed results:", results);
+
+    const responseData = {
+      electionId: election._id,
+      electionName: election.title,
+      status: election.status,
+      startTime: election.startTime,
+      endTime: election.endTime,
+      totalVotes: election.totalVotes,
+      results,
+    };
+
+    console.log(
+      "Sending election results:",
+      JSON.stringify(responseData, null, 2)
+    );
+
+    res.status(200).json(responseData);
+  } catch (error) {
+    console.error("Error fetching results:", error);
+    res.status(500).json({
+      message: "Failed to fetch election results",
+      error: error.message,
+    });
+  }
 };

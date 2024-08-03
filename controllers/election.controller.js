@@ -13,7 +13,6 @@ exports.createElection = async (req, res) => {
       startTime,
       endTime,
       status: "scheduled",
-      // candidates: candidates.map((candidate) => new Candidate(candidate)),
     });
     await election.save();
     res.status(201).json(election);
@@ -85,7 +84,7 @@ exports.updateElectionStatus = async (req, res) => {
       scheduled: ["active"],
       active: ["ended"],
       extended: ["ended"],
-      ended: [],
+      ended: [ "extended"],
     };
 
     if (!validTransitions[election.status].includes(status)) {
@@ -151,7 +150,7 @@ exports.updateElectionStatus = async (req, res) => {
     });
   }
 };
-// Add this to your election.controller.js file
+
 
 
 
@@ -234,6 +233,7 @@ exports.getResults = async (req, res) => {
       candidates: portfolio.candidates.map((candidate) => ({
         _id: candidate._id,
         name: candidate.name,
+        image:candidate.image,
         votes: candidate.votes || 0,
         yesNoVotes:
           candidate.yesVotes !== undefined

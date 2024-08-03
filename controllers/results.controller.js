@@ -36,6 +36,7 @@ exports.getResults = async (req, res) => {
             _id: candidate._id,
             name: candidate.name,
             votes: candidate.votes,
+            image:candidate.image,
             yesNoVotes:
               candidate.yesVotes !== undefined
                 ? {

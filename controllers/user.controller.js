@@ -145,7 +145,7 @@ exports.superAdminLogin = async (req, res) => {
 };
 
 exports.officialLogin = async (req, res) => {
-  const { STUDENTID, password } = req.body;
+  const { STUDENTID, password,  } = req.body;
 
   try {
     // Check if the official exists
@@ -159,6 +159,7 @@ exports.officialLogin = async (req, res) => {
     if (!isPasswordCorrect) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
+  
 
     // Generate token
     const token = generateToken(official._id, "Official");

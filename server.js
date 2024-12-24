@@ -17,13 +17,25 @@ dbConnect();
 // Initialize express app
 const app = express();
 
-// Middleware
+
+
+const allowedOrigins = [
+  "http://localhost:5173",
+];
+
 app.use(express.json());
-app.use(
-  cors({
-    origin: "http://localhost:5173",
-  })
-);
+
+
+const corsOptions = {
+  origin: "*", // Allow all origins for testing
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+  credentials: true,
+  preflightContinue: false,
+  optionsSuccessStatus: 204,
+};
+app.use(cors(corsOptions));
+
+app.use(cors(corsOptions));
 // Set up multer for file uploads
 const upload = multer({ dest: "uploads/" });
 
@@ -95,6 +107,6 @@ app.use("/api", require("./routes/routes"));
 
 // Start server
 const port = process.env.PORT || 3000;
-app.listen(port, () => {
+app.listen(port, "0.0.0.0", () => {
   console.log(`Server is running on port ${port}`);
 });
